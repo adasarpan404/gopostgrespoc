@@ -26,33 +26,28 @@ type Profile struct {
 }
 
 func main() {
-	// Load .env file
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatalf("Error loading .env file: %v", err)
 	}
 
-	// Get the database URL from the environment
 	dsn := os.Getenv("NEON_DATABASE_URL")
 	if dsn == "" {
 		log.Fatal("NEON_DATABASE_URL is not set in the environment")
 	}
 
-	// Connect to the Neon database
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatalf("Failed to connect to Neon PostgreSQL: %v", err)
 	}
 	fmt.Println("Connected to Neon PostgreSQL with GORM!")
 
-	// Migrate the schema for User and Profile
 	err = db.AutoMigrate(&User{}, &Profile{})
 	if err != nil {
 		log.Fatalf("Failed to migrate database schema: %v", err)
 	}
 	fmt.Println("Database schema migrated!")
 
-	// Insert a new user with a profile
 	newUser := User{
 		Name:     "John Doe",
 		Email:    "john.doe@neon.tech",
@@ -68,9 +63,8 @@ func main() {
 	}
 	fmt.Printf("Inserted user with profile: %+v\n", newUser)
 
-	// Fetch users and their profiles
 	var users []User
-	result = db.Preload("Profile").Find(&users) // Preload to fetch related Profile
+	result = db.Preload("Profile").Find(&users)
 	if result.Error != nil {
 		log.Fatalf("Failed to fetch users with profiles: %v", result.Error)
 	}
